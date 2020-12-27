@@ -119,7 +119,7 @@ services:
 				Captype: types.TypeTrait,
 			}
 		}
-		app := newApplication(nil, tm)
+		app := NewApplication(nil, tm)
 		err := yaml.Unmarshal([]byte(c.raw), &app)
 		assert.NoError(t, err, caseName)
 		err = app.Validate()

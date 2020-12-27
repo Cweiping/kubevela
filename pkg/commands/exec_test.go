@@ -52,14 +52,14 @@ func TestExecCommand(t *testing.T) {
 	err := o.Init(context.Background(), cmd, []string{"fakeApp"})
 	errString := fmt.Sprintf(`application "%s" not found`, "fakeApp")
 	assert.EqualError(t, err, errString)
-	fakeApp := &application.Application{
-		AppFile: &appfile.AppFile{
+	fakeApp := application.NewApplication(
+		&appfile.AppFile{
 			Name: "fakeApp",
 			Services: map[string]appfile.Service{
 				"fakeComp": map[string]interface{}{},
 			},
-		},
-	}
+		}, nil,
+	)
 	o.App = fakeApp
 
 	cf := genericclioptions.NewConfigFlags(true)
@@ -78,15 +78,15 @@ func TestExecCommandPersistentPreRunE(t *testing.T) {
 
 func TestGetComponent(t *testing.T) {
 	o := &VelaExecOptions{
-		App: &application.Application{
-			AppFile: &appfile.AppFile{
+		App: application.NewApplication(
+			&appfile.AppFile{
 				Name: "fakeApp",
 				Services: map[string]appfile.Service{
 					"fakeComp1": map[string]interface{}{},
 					"fakeComp2": map[string]interface{}{},
 				},
-			},
-		},
+			}, nil,
+		),
 	}
 
 	o.ServiceName = "fakeComp1"

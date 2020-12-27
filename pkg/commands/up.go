@@ -202,7 +202,7 @@ func (o *AppfileOptions) Run(filePath string) error {
 }
 
 func (o *AppfileOptions) saveToAppDir(f *appfile.AppFile) error {
-	app := &application.Application{AppFile: f}
+	app := application.NewApplication(f, nil)
 	return app.Save(o.Env.Name)
 }
 

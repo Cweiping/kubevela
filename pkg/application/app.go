@@ -21,15 +21,19 @@ import (
 
 // Application is an implementation level object for Appfile, all vela commands will access AppFile from Appliction struct here.
 type Application struct {
-	*appfile.AppFile `json:",inline"`
-	tm               template.Manager
+	driver.RespApplication
 }
 
-func newApplication(f *appfile.AppFile, tm template.Manager) *Application {
+// NewApplication will create a application
+func NewApplication(f *appfile.AppFile, tm template.Manager) *Application {
 	if f == nil {
 		f = appfile.NewAppFile()
 	}
-	return &Application{AppFile: f, tm: tm}
+	return convertToApplication(driver.RespApplication{AppFile: f, Tm: tm})
+}
+
+func convertToApplication(app driver.RespApplication) *Application {
+	return &Application{app}
 }
 
 // NewEmptyApplication new empty application, only set tm
@@ -38,7 +42,7 @@ func NewEmptyApplication() (*Application, error) {
 	if err != nil {
 		return nil, err
 	}
-	return newApplication(nil, tm), nil
+	return NewApplication(nil, tm), nil
 }
 
 // IsNotFound is application not found error
@@ -52,7 +56,7 @@ func Load(envName, appName string) (*Application, error) {
 	if err != nil {
 		return nil, err
 	}
-	app := newApplication(respApp.AppFile, respApp.Tm)
+	app := NewApplication(respApp.AppFile, respApp.Tm)
 	err = app.Validate()
 	return app, err
 }
@@ -70,7 +74,7 @@ func List(envName string) ([]*Application, error) {
 	}
 	var apps []*Application
 	for _, resp := range respApps {
-		app := newApplication(resp.AppFile, resp.Tm)
+		app := NewApplication(resp.AppFile, resp.Tm)
 		err := app.Validate()
 		if err != nil {
 			return nil, err
@@ -98,7 +102,7 @@ func MatchAppByComp(envName, compName string) (*Application, error) {
 
 // Save will save appfile into default dir.
 func (app *Application) Save(envName string) error {
-	return storage.Store.Save(&driver.RespApplication{AppFile: app.AppFile, Tm: app.tm}, envName)
+	return storage.Store.Save(&driver.RespApplication{AppFile: app.AppFile, Tm: app.Tm}, envName)
 }
 
 // Validate will validate whether an Appfile is valid.
@@ -111,7 +115,7 @@ func (app *Application) Validate() error {
 	}
 	for name, svc := range app.Services {
 		for traitName, traitData := range svc.GetConfig() {
-			if app.tm.IsTrait(traitName) {
+			if app.Tm.IsTrait(traitName) {
 				if _, ok := traitData.(map[string]interface{}); !ok {
 					return fmt.Errorf("trait %s in '%s' must be map", traitName, name)
 				}
@@ -148,7 +152,7 @@ func (app *Application) GetWorkload(componentName string) (string, map[string]in
 	}
 	workloadData := make(map[string]interface{})
 	for k, v := range config {
-		if app.tm.IsTrait(k) {
+		if app.Tm.IsTrait(k) {
 			continue
 		}
 		workloadData[k] = v
@@ -174,7 +178,7 @@ func (app *Application) GetTraits(componentName string) (map[string]map[string]i
 	_, config := app.GetServiceConfig(componentName)
 	traitsData := make(map[string]map[string]interface{})
 	for k, v := range config {
-		if !app.tm.IsTrait(k) {
+		if !app.Tm.IsTrait(k) {
 			continue
 		}
 		newV, ok := v.(map[string]interface{})
@@ -202,7 +206,7 @@ func (app *Application) GetTraitsByType(componentName, traitType string) (map[st
 // OAM will convert an AppFile to OAM objects
 // TODO(wonderflow) add scope support here
 func (app *Application) OAM(env *types.EnvMeta, io cmdutil.IOStreams, silence bool) ([]*v1alpha2.Component, *v1alpha2.ApplicationConfiguration, []oam.Object, error) {
-	comps, appConfig, scopes, err := app.BuildOAM(env.Namespace, io, app.tm, silence)
+	comps, appConfig, scopes, err := app.BuildOAM(env.Namespace, io, app.Tm, silence)
 	if err != nil {
 		return nil, nil, nil, err
 	}
