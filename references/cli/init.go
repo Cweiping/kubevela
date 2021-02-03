@@ -55,7 +55,7 @@ func NewInitCommand(c types.Args, ioStreams cmdutil.IOStreams) *cobra.Command {
 				return err
 			}
 			o.client = newClient
-			o.Env, err = GetEnv(cmd)
+			o.Env, err = GetEnv(context.Background(), newClient, cmd.Flag("env").Value.String())
 			if err != nil {
 				return err
 			}
@@ -148,7 +148,7 @@ func (o *appInitOptions) CheckEnv() error {
 			return fmt.Errorf("read email err %w", err)
 		}
 	}
-	if _, err := env.CreateOrUpdateEnv(context.Background(), o.client, o.Env.Name, o.Env); err != nil {
+	if _, err := env.CreateOrUpdateEnv(context.Background(), o.client, o.Env); err != nil {
 		return err
 	}
 	return nil

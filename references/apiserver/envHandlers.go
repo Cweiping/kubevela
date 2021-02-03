@@ -30,7 +30,7 @@ func (s *APIServer) CreateEnv(c *gin.Context) {
 	}
 
 	ctx := util.GetContext(c)
-	message, err := env.CreateEnv(ctx, s.KubeClient, name, &types.EnvMeta{
+	message, err := env.CreateOrUpdateEnv(ctx, s.KubeClient, &types.EnvMeta{
 		Name:      name,
 		Current:   environment.Current,
 		Namespace: namespace,
@@ -57,7 +57,10 @@ func (s *APIServer) UpdateEnv(c *gin.Context) {
 		return
 	}
 	ctx := util.GetContext(c)
-	message, err := env.UpdateEnv(ctx, s.KubeClient, envName, environmentBody.Namespace)
+	message, err := env.UpdateEnv(ctx, s.KubeClient, &types.EnvMeta{
+		Name:      envName,
+		Namespace: environmentBody.Namespace,
+	})
 	util.AssembleResponse(c, message, err)
 }
 
@@ -71,7 +74,7 @@ func (s *APIServer) UpdateEnv(c *gin.Context) {
 func (s *APIServer) GetEnv(c *gin.Context) {
 	envName := c.Param("envName")
 	ctrl.Log.Info("Get a get environment request", "envName", envName)
-	envList, err := env.ListEnvs(envName)
+	envList, err := env.ListEnvs(util.GetContext(c), s.KubeClient, envName)
 
 	environmentList := make([]apis.Environment, 0)
 	for _, envMeta := range envList {
@@ -106,7 +109,7 @@ func (s *APIServer) ListEnv(c *gin.Context) {
 func (s *APIServer) DeleteEnv(c *gin.Context) {
 	envName := c.Param("envName")
 	ctrl.Log.Info("Delete a delete environment request", "envName", envName)
-	msg, err := env.DeleteEnv(envName)
+	msg, err := env.DeleteEnv(util.GetContext(c), s.KubeClient, envName)
 	util.AssembleResponse(c, msg, err)
 }
 
@@ -120,6 +123,6 @@ func (s *APIServer) DeleteEnv(c *gin.Context) {
 func (s *APIServer) SetEnv(c *gin.Context) {
 	envName := c.Param("envName")
 	ctrl.Log.Info("Patch a set environment request", "envName", envName)
-	msg, err := env.SetEnv(envName)
+	msg, err := env.SetEnv(util.GetContext(c), s.KubeClient, envName)
 	util.AssembleResponse(c, msg, err)
 }

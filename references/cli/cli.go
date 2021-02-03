@@ -6,15 +6,16 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/spf13/cobra"
-	"k8s.io/klog"
-
 	"github.com/oam-dev/kubevela/apis/types"
 	"github.com/oam-dev/kubevela/pkg/utils/common"
 	"github.com/oam-dev/kubevela/pkg/utils/system"
 	"github.com/oam-dev/kubevela/pkg/utils/util"
 	"github.com/oam-dev/kubevela/references/cmd/cli/fake"
 	"github.com/oam-dev/kubevela/version"
+
+	"k8s.io/klog"
+
+	"github.com/spf13/cobra"
 )
 
 // NewCommand will contain all commands
@@ -51,7 +52,6 @@ func NewCommand() *cobra.Command {
 		fmt.Println("InitDir err", err)
 		os.Exit(1)
 	}
-
 	cmds.AddCommand(
 		// Getting Start
 		NewInstallCommand(commandArgs, fake.ChartSource, ioStream),
@@ -68,7 +68,7 @@ func NewCommand() *cobra.Command {
 		NewPortForwardCommand(commandArgs, ioStream),
 		NewLogsCommand(commandArgs, ioStream),
 		NewEnvCommand(commandArgs, ioStream),
-		NewConfigCommand(ioStream),
+		NewConfigCommand(commandArgs, ioStream),
 
 		// Capabilities
 		CapabilityCommandGroup(commandArgs, ioStream),

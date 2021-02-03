@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"context"
 	"errors"
 
 	"github.com/spf13/cobra"
@@ -37,7 +38,7 @@ func NewDeleteCommand(c types.Args, ioStreams cmdutil.IOStreams) *cobra.Command 
 			C: c,
 		}
 		o.Client = newClient
-		o.Env, err = GetEnv(cmd)
+		o.Env, err = GetEnv(context.Background(), newClient, cmd.Flag("env").Value.String())
 		if err != nil {
 			return err
 		}

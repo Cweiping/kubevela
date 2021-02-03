@@ -1,6 +1,8 @@
 package cli
 
 import (
+	"context"
+
 	"github.com/spf13/cobra"
 
 	"github.com/oam-dev/kubevela/apis/types"
@@ -18,8 +20,15 @@ func NewExportCommand(c types.Args, ioStream cmdutil.IOStreams) *cobra.Command {
 		Annotations: map[string]string{
 			types.TagCommandType: types.TypeStart,
 		},
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			return c.SetConfig()
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			velaEnv, err := GetEnv(cmd)
+			newClient, err := c.GetClient()
+			if err != nil {
+				return err
+			}
+			velaEnv, err := GetEnv(context.Background(), newClient, cmd.Flag("env").Value.String())
 			if err != nil {
 				return err
 			}

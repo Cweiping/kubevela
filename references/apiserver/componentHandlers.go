@@ -14,7 +14,7 @@ import (
 // GetComponent gets a comoponent from cluster
 func (s *APIServer) GetComponent(c *gin.Context) {
 	envName := c.Param("envName")
-	envMeta, err := env.GetEnvByName(envName)
+	envMeta, err := env.GetEnvByName(util.GetContext(c), s.KubeClient, envName)
 	if err != nil {
 		util.HandleError(c, util.StatusInternalServerError, err)
 		return
@@ -34,7 +34,7 @@ func (s *APIServer) GetComponent(c *gin.Context) {
 // DeleteComponent deletes a component from cluster
 func (s *APIServer) DeleteComponent(c *gin.Context) {
 	envName := c.Param("envName")
-	envMeta, err := env.GetEnvByName(envName)
+	envMeta, err := env.GetEnvByName(util.GetContext(c), s.KubeClient, envName)
 	if err != nil {
 		util.HandleError(c, util.StatusInternalServerError, err)
 		return

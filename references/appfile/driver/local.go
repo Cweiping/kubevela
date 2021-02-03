@@ -9,7 +9,6 @@ import (
 
 	"github.com/ghodss/yaml"
 
-	"github.com/oam-dev/kubevela/pkg/utils/env"
 	"github.com/oam-dev/kubevela/pkg/utils/system"
 	"github.com/oam-dev/kubevela/references/appfile/api"
 )
@@ -60,7 +59,7 @@ func (l *Local) Delete(envName, appName string) error {
 }
 
 func getApplicationDir(envName string) (string, error) {
-	appDir := filepath.Join(env.GetEnvDirByName(envName), "applications")
+	appDir := filepath.Join(system.GetEnvDirByName(envName), "applications")
 	_, err := system.CreateIfNotExist(appDir)
 	if err != nil {
 		err = fmt.Errorf("getting application directory from env %s failed, error: %w ", envName, err)

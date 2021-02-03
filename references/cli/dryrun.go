@@ -53,7 +53,7 @@ func NewDryRunCommand(c types.Args, ioStreams cmdutil.IOStreams) *cobra.Command 
 
 			parser := appfile.NewApplicationParser(newClient, dm)
 
-			velaEnv, err := GetEnv(cmd)
+			velaEnv, err := GetEnv(context.Background(), newClient, cmd.Flag("env").Value.String())
 			if err != nil {
 				return err
 			}
